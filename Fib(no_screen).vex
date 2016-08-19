@@ -1,0 +1,7 @@
+ROM={"LOAD	A	1",
+     "LOAD	B	0",
+     "ADD	A	B",
+	 "PRNT	A",
+     "ADD	B	A",
+	 "PRNT	B",
+	 "JMP	3"}
