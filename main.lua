@@ -296,6 +296,21 @@ function love.update()
    Y=tonumber(opcode[2])
   end
   PC=PC+1
+ elseif opcode[1] == "REAR" then
+  if is_REG(opcode[2]) then
+   REGS[def_REG(opcode[2])]=screen[Y+1][X+1][1]
+  end
+  PC=PC+1
+ elseif opcode[1] == "REAG" then
+  if is_REG(opcode[2]) then
+   REGS[def_REG(opcode[2])]=screen[Y+1][X+1][2]
+  end
+  PC=PC+1
+ elseif opcode[1] == "REAB" then
+  if is_REG(opcode[2]) then
+   REGS[def_REG(opcode[2])]=screen[Y+1][X+1][3]
+  end
+  PC=PC+1
  elseif opcode[1] == "PLOT" then
   --print(x,R,G,B,A)
   screen[Y+1][X+1]={R,G,B}
@@ -315,7 +330,7 @@ function love.update()
   rectangle(points[1][1],points[1][2],points[2][1],points[2][2],{R,G,B})
   PC=PC+1
  elseif opcode[1] == "RES" then
-  love.window.setMode(X, Y)
+  love.graphics.setMode(X, Y)
   REGS[9]=X
   REGS[10]=Y
   PC=PC+1

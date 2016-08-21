@@ -1,0 +1,48 @@
+ROM={"MOV	G    SCW",--\
+     "DIV	G    2",--  |
+     "MOV	H    SCH",--|
+     "DIV	H    2",--  \CENTER OF THE SCREEN
+     "LOAD	A    0",--R
+     "LOAD	B    0",--G
+     "LOAD	C    0",--B
+     "LOAD	D    0",--DIRECTION 0=^ 1=> 2=v 3=<
+     "LOAD	E    0",--BLOCK UNDER CORDS
+     "REAR	A",
+     "REAG	B",
+     "REAB	C",
+     "RCOL	255",
+	 "GCOL	255",
+	 "BCOL	255",
+	 "PLOT"
+	 "DETC	B 1",
+     "IF	3",
+     "JMP	38",
+     "DETC	B 0",
+     "IF    3",
+     "JMP	24",
+     "DETC	E 0",
+     "IF	2",
+     "DETC	E 1",
+     "IF	2",
+     "JMP	10",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "RCOL	255",
+	 "GCOL	255",
+	 "BCOL	255",
+     "PLOT",
+     "JMP	23",
+     "RCOL	255",
+	 "GCOL	255",
+	 "BCOL	255",
+     "PLOT",
+     "",
+     "",
+     "",
+     "",
+     "JMP	23"}
