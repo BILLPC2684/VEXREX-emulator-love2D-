@@ -6,7 +6,7 @@ end
 local clock = os.clock
 function sleep(n)  -- seconds
   local t0 = clock()
-  while clock() - t0 <= n/1000 do end
+  while clock() - t0 <= n do end
 end
 
 function rectangle(x0, y0, x1, y1, color)
@@ -234,14 +234,24 @@ function love.update()
  elseif opcode[1] == "RRAM" then
   REGS[def_REG(opcode[2])]=RAM[REGS[def_REG(opcode[3])]]
  elseif opcode[1] == "DETC" then
-  if REGS[def_REG(opcode[2])] == 0 and REGS[def_REG(opcode[3])] == 0 then
-   REGS[def_REG("F")]=0
-  elseif REGS[def_REG(opcode[2])]<REGS[def_REG(opcode[3])] then
-   REGS[def_REG("F")]=1
-  elseif REGS[def_REG(opcode[2])]==REGS[def_REG(opcode[3])] then
-   REGS[def_REG("F")]=2
-  elseif REGS[def_REG(opcode[2])]>REGS[def_REG(opcode[3])] then
-   REGS[def_REG("F")]=3
+  if is_REG(opcode[3]) then
+   if REGS[def_REG(opcode[2])] == 0 and REGS[def_REG(opcode[3])] == 0 then
+    REGS[def_REG("F")]=0
+   elseif REGS[def_REG(opcode[2])]<REGS[def_REG(opcode[3])] then
+    REGS[def_REG("F")]=1
+   elseif REGS[def_REG(opcode[2])]==REGS[def_REG(opcode[3])] then
+    REGS[def_REG("F")]=2
+   elseif REGS[def_REG(opcode[2])]>REGS[def_REG(opcode[3])] then
+    REGS[def_REG("F")]=3
+   end
+  else
+   if REGS[def_REG(opcode[2])]<tonumber(opcode[3]) then
+    REGS[def_REG("F")]=1
+   elseif REGS[def_REG(opcode[2])]==tonumber(opcode[3]) then
+    REGS[def_REG("F")]=2
+   elseif REGS[def_REG(opcode[2])]>tonumber(opcode[3]) then
+    REGS[def_REG("F")]=3
+   end
   end
   PC=PC+1
  elseif opcode[1] == "RNG" then
@@ -299,16 +309,19 @@ function love.update()
  elseif opcode[1] == "REAR" then
   if is_REG(opcode[2]) then
    REGS[def_REG(opcode[2])]=screen[Y+1][X+1][1]
+   print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
   end
   PC=PC+1
  elseif opcode[1] == "REAG" then
   if is_REG(opcode[2]) then
    REGS[def_REG(opcode[2])]=screen[Y+1][X+1][2]
+   print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
   end
   PC=PC+1
  elseif opcode[1] == "REAB" then
   if is_REG(opcode[2]) then
    REGS[def_REG(opcode[2])]=screen[Y+1][X+1][3]
+   print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
   end
   PC=PC+1
  elseif opcode[1] == "PLOT" then
@@ -335,6 +348,7 @@ function love.update()
   REGS[10]=Y
   PC=PC+1
  end
+ sleep(0.1)
 end
 function love.draw()
  --[[if mode == 0 then
