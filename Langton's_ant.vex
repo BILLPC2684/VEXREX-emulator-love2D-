@@ -1,48 +1,82 @@
-ROM={"MOV	G    SCW",--\
-     "DIV	G    2",--  |
-     "MOV	H    SCH",--|
-     "DIV	H    2",--  \CENTER OF THE SCREEN
-     "LOAD	A    0",--R
-     "LOAD	B    0",--G
-     "LOAD	C    0",--B
-     "LOAD	D    0",--DIRECTION 0=^ 1=> 2=v 3=<
-     "LOAD	E    0",--BLOCK UNDER CORDS
-     "REAR	A",
-     "REAG	B",
-     "REAB	C",
+ROM={"MOV	G	SCW",--\ [PROGRAM LANGTON'S ANT]
+     "DIV	G	2",--  |
+     "MOV	H	SCH",--|
+     "DIV	H	2",--  \CENTER OF THE SCREEN
+     "LOAD	A	0",--R
+     "LOAD	B	0",--G
+     "LOAD	C	0",--B
+     "LOAD	D	0",--DIRECTION 0=^ 1=> 2=v 3=<
+     "LOAD	E	0",--BLOCK UNDER CORDS
+     "REAR	A",--READS R FROM THE RGB OF THE SELECTED PIXEL ONSCREEN
+     "REAG	B",--READS G FROM THE RGB OF THE SELECTED PIXEL ONSCREEN
+     "REAB	C",--READS B FROM THE RGB OF THE SELECTED PIXEL ONSCREEN
      "RCOL	255",
-	 "GCOL	255",
-	 "BCOL	255",
-	 "PLOT"
-	 "DETC	B 1",
+     "GCOL	0",
+     "BCOL	0",
+	 "XPOS	G",
+	 "YPOS	H",
+     "PLOT",
+     "DETC	B	0",
+     "IF	2",
+     "JMP	25",
      "IF	3",
-     "JMP	38",
-     "DETC	B 0",
-     "IF    3",
-     "JMP	24",
-     "DETC	E 0",
-     "IF	2",
-     "DETC	E 1",
-     "IF	2",
+     "JMP	42",
      "JMP	10",
-     "",
-     "",
-     "",
-     "",
-     "",
-     "",
-     "",
      "RCOL	255",
-	 "GCOL	255",
-	 "BCOL	255",
-     "PLOT",
-     "JMP	23",
-     "RCOL	255",
-	 "GCOL	255",
-	 "BCOL	255",
-     "PLOT",
-     "",
-     "",
-     "",
-     "",
-     "JMP	23"}
+     "GCOL	255",
+     "BCOL	255",
+	 "PLOT",
+     "DETC	E	0",
+     "IF	2",
+     "JMP	62",
+     "DETC	E	1",
+     "IF	2",
+     "JMP	65",
+     "DETC	E	2",
+     "IF	2",
+     "JMP	68",
+     "DETC	E	3",
+     "IF	2",
+     "JMP	59",
+     "JMP	24",--END
+     "RCOL	0",
+     "GCOL	0",
+     "BCOL	0",
+	 "PLOT",
+     "DETC	E	0",
+     "IF	2",
+     "JMP	80",
+     "DETC	E	1",
+     "IF	2",
+     "JMP	71",
+     "DETC	E	2",
+     "IF	2",
+     "JMP	74",
+     "DETC	E	3",
+     "IF	2",
+     "JMP	77",
+     "JMP	24",--END
+     "LOAD	E	0",
+     "SUB	H	1",
+     "JMP	41",
+     "LOAD	E	1",
+     "ADD	G	1",
+     "JMP	41",
+     "LOAD	E	2",
+     "ADD	H	1",
+     "JMP	41",
+     "LOAD	E	3",
+     "SUB	G	1",
+     "JMP	41",
+     "LOAD	E	0",
+     "SUB	H	1",
+     "JMP	58",
+     "LOAD	E	1",
+     "ADD	G	1",
+     "JMP	58",
+     "LOAD	E	2",
+     "ADD	H	1",
+     "JMP	58",
+     "LOAD	E	3",
+     "SUB	G	1",
+     "JMP	58"}
