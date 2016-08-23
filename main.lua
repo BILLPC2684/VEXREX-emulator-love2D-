@@ -1,7 +1,71 @@
+function love.run()
+
+	if love.math then
+		love.math.setRandomSeed(os.time())
+	end
+
+	if love.load then love.load(arg) end
+
+	-- We don't want the first frame's dt to include time taken by love.load.
+	if love.timer then love.timer.step() end
+
+	local dt = 0
+
+	-- Main loop time.
+	while true do
+		-- Process events.
+		if love.event then
+			love.event.pump()
+			for name, a,b,c,d,e,f in love.event.poll() do
+				if name == "quit" then
+					if not love.quit or not love.quit() then
+						return a
+					end
+				end
+				love.handlers[name](a,b,c,d,e,f)
+			end
+		end
+
+		-- Update dt, as we'll be passing it to update
+		if love.timer then
+			love.timer.step()
+			dt = love.timer.getDelta()
+		end
+
+		-- Call update and draw
+		if love.update then love.update(dt) end -- will pass 0 if love.timer is disabled
+
+		if love.graphics and love.graphics.isActive() then
+			love.graphics.origin()
+			if love.draw then love.draw() end
+			love.graphics.present()
+		end
+
+		if love.timer then love.timer.sleep(0.001) end
+	end
+
+end
 --"C:\Program Files\LOVE\love.exe" ./ <ROM> --console
+skipframe=8
+t1max,CPS=0,0
+state = true
+love.mouse.setGrabbed(state)
+love.mouse.setVisible(not state)
 ---FUNCIONS---
-function love.keyPressed(key)
- keyin = key
+function love.keypressed(key)
+ if key == "escape" then
+  local state = not love.mouse.isGrabbed()   -- the opposite of whatever it currently is
+  love.mouse.setGrabbed(state) --Use love.mouse.setGrab(state) for 0.8.0 or lower
+  love.mouse.setVisible(not state)
+ elseif key == "kp+" then
+  skipframe=skipframe+1
+  print(skipframe)
+ elseif key == "kp-" then
+  skipframe=skipframe-1
+  print(skipframe)
+ else
+  keyin = key
+ end
 end
 local clock = os.clock
 function sleep(n)  -- seconds
@@ -170,12 +234,26 @@ function love.load()
  for i=0,1024 do
   table.insert(RAM,#RAM+1,0)
  end
+ drawmode = 1
 end
+clock1 = os.clock
+clock2 = os.clock
+t2 = clock2()
 function love.update()
+ t1 = clock1()
  opcode=split(tostring(ROM[PC]),"	" or " ")
- print("PC:"..tostring(PC),"opcode:",opcode[1],opcode[2],opcode[3],"REGS:",REGS[1],REGS[2],REGS[3],REGS[4],REGS[5],REGS[6],REGS[7],REGS[8],"SCREEN:",REGS[9],REGS[10],"POS/COL:",X,Y,R,G,B,A,"POINTS:",points[1][1],points[1][2],points[2][1],points[2][2])
+ --print("PC:"..tostring(PC),"opcode:",opcode[1],opcode[2],opcode[3],"REGS:",REGS[1],REGS[2],REGS[3],REGS[4],REGS[5],REGS[6],REGS[7],REGS[8],"\nSCREEN:",REGS[9],REGS[10],"POS/COL:",X,Y,R,G,B,A,"\nPOINTS:",points[1][1],points[1][2],points[2][1],points[2][2])
  if opcode[1] == "LOAD" then
   REGS[def_REG(opcode[2])]=tonumber(opcode[3])
+  PC=PC+1
+ elseif opcode[1] == "INKY" then
+  REGS[def_REG(opcode[2])]=love.keyboard.isDown(tonumber(opcode[3]))
+  PC=PC+1
+ elseif opcode[1] == "CRLC" then
+  REGS[def_REG(opcode[2])],REGS[def_REG(opcode[3])]=love.mouse.getPosition()
+  PC=PC+1
+ elseif opcode[1] == "CLIK" then
+  REGS[def_REG(opcode[2])]=love.mouse.isDown(tonumber(opcode[3]))
   PC=PC+1
  elseif opcode[1] == "MOV" then
   if is_REG(opcode[3]) then
@@ -309,24 +387,25 @@ function love.update()
  elseif opcode[1] == "REAR" then
   if is_REG(opcode[2]) then
    REGS[def_REG(opcode[2])]=screen[Y+1][X+1][1]
-   print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
+   --print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
   end
   PC=PC+1
  elseif opcode[1] == "REAG" then
   if is_REG(opcode[2]) then
    REGS[def_REG(opcode[2])]=screen[Y+1][X+1][2]
-   print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
+   --print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
   end
   PC=PC+1
  elseif opcode[1] == "REAB" then
   if is_REG(opcode[2]) then
    REGS[def_REG(opcode[2])]=screen[Y+1][X+1][3]
-   print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
+   --print(screen[Y+1][X+1][1],screen[Y+1][X+1][2],screen[Y+1][X+1][3])
   end
   PC=PC+1
  elseif opcode[1] == "PLOT" then
   --print(x,R,G,B,A)
   screen[Y+1][X+1]={R,G,B}
+  drawmode = 1
   PC=PC+1
  elseif opcode[1] == "PONT" then
   points[tonumber(opcode[2])][1]=X
@@ -334,27 +413,31 @@ function love.update()
   PC=PC+1
  elseif opcode[1] == "LINE" then
   --print(x,R,G,B,A)
-  print(points[1][1],points[1][2],points[2][1],points[2][2],"|",R,G,B)
+  --print(points[1][1],points[1][2],points[2][1],points[2][2],"|",R,G,B)
   line(points[1][1],points[1][2],points[2][1],points[2][2],{R,G,B})
+  drawmode = 1
   PC=PC+1
  elseif opcode[1] == "RECT" then
   --print(x,R,G,B,A)
-  print(points[1][1],points[1][2],points[2][1],points[2][2],"|",R,G,B)
+  --print(points[1][1],points[1][2],points[2][1],points[2][2],"|",R,G,B)
   rectangle(points[1][1],points[1][2],points[2][1],points[2][2],{R,G,B})
-  PC=PC+1
- elseif opcode[1] == "RES" then
-  love.graphics.setMode(X, Y)
-  REGS[9]=X
-  REGS[10]=Y
+  drawmode = 1
   PC=PC+1
  end
- sleep(0.1)
+ t1=clock1()-t1
+ if t1 > t1max then
+  t1max=t1
+  print("commands per ms="..tostring(t1max).."/commands per sec="..tostring(CPS))
+ end
+ if clock() - t2 <= 1 then
+  CPS=CPS+1
+  print("commands per ms="..tostring(t1max).."/commands per sec="..tostring(CPS))
+ end
+ --sleep(1)
 end
+frame = skipframe
 function love.draw()
- --[[if mode == 0 then
-  love.graphics.setColor(255,255,255)
-  love.graphics.print(">"..filename,10,10)
- else]]
+ if drawmode == 1 and frame < 1 then
   for renderX=0,resX do
    for renderY=0,resY do
     --print(renderY,renderX,screen[renderY+1][renderX+1][1],screen[renderY+1][renderX+1][2],screen[renderY+1][renderX+1][3])
@@ -364,7 +447,12 @@ function love.draw()
     love.graphics.rectangle('fill',renderX-1,renderY-1,renderX-1,renderY-1)
     love.graphics.setColor(screenl2[renderY+1][renderX+1][1],screenl2[renderY+1][renderX+1][2],screenl2[renderY+1][renderX+1][3],screenl1[renderY+1][renderX+1][4])
     love.graphics.rectangle('fill',renderX-1,renderY-1,renderX-1,renderY-1)--]]
+	drawmode = 0
+	frame = skipframe
    end
   end
- --end
+ end
+ if frame > 0 then
+  frame=frame-1
+ end
 end
