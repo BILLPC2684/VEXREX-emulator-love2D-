@@ -45,15 +45,22 @@ function love.run()
 	end
 
 end
+t4=0
 --"C:\Program Files\LOVE\love.exe" ./ <ROM> --console
-skipframe=8
+skipframe=4
 t1max,CPS=0,0
 state = true
 love.mouse.setGrabbed(state)
 love.mouse.setVisible(not state)
 ---FUNCIONS---
+clock = os.clock
+function sleep(n)  -- seconds
+  local t0 = clock()
+  while clock() - t0 <= n do end
+end
 function love.keypressed(key)
  if key == "escape" then
+  t4 = clock()
   local state = not love.mouse.isGrabbed()   -- the opposite of whatever it currently is
   love.mouse.setGrabbed(state) --Use love.mouse.setGrab(state) for 0.8.0 or lower
   love.mouse.setVisible(not state)
@@ -67,10 +74,12 @@ function love.keypressed(key)
   keyin = key
  end
 end
-local clock = os.clock
-function sleep(n)  -- seconds
-  local t0 = clock()
-  while clock() - t0 <= n do end
+function love.keyreleased(key)
+ if key == "escape" then
+  if clock() - t4 > 1 then
+   error("POWERED OFF!!!")
+  end
+ end
 end
 
 function rectangle(x0, y0, x1, y1, color)
@@ -155,6 +164,24 @@ function def_REG(ID)
  end
 end
 
+function def_CursorButton(ID)
+ if ID == 1 then
+  return "l"
+ elseif ID == 2 then
+  return "m"
+ elseif ID == 3 then
+  return "r"
+ elseif ID == 4 then
+  return "wd"
+ elseif ID == 5 then
+  return "wu"
+ elseif ID == 6 then
+  return "x1"
+ elseif ID == 7 then
+  return "x2"
+ end
+end
+
 function split(str, pat)
 	local t = {}  -- NOTE: use {n = 0} in Lua-5.0
 	local fpat = "(.-)" .. pat
@@ -236,11 +263,9 @@ function love.load()
  end
  drawmode = 1
 end
-clock1 = os.clock
-clock2 = os.clock
-t2 = clock2()
+t2 = clock()
 function love.update()
- t1 = clock1()
+ t1 = clock()
  opcode=split(tostring(ROM[PC]),"	" or " ")
  --print("PC:"..tostring(PC),"opcode:",opcode[1],opcode[2],opcode[3],"REGS:",REGS[1],REGS[2],REGS[3],REGS[4],REGS[5],REGS[6],REGS[7],REGS[8],"\nSCREEN:",REGS[9],REGS[10],"POS/COL:",X,Y,R,G,B,A,"\nPOINTS:",points[1][1],points[1][2],points[2][1],points[2][2])
  if opcode[1] == "LOAD" then
@@ -253,7 +278,11 @@ function love.update()
   REGS[def_REG(opcode[2])],REGS[def_REG(opcode[3])]=love.mouse.getPosition()
   PC=PC+1
  elseif opcode[1] == "CLIK" then
-  REGS[def_REG(opcode[2])]=love.mouse.isDown(tonumber(opcode[3]))
+  if is_REG(opcode[3]) then
+   REGS[def_REG(opcode[2])]=love.mouse.isDown(opcode[3])
+  else
+   REGS[def_REG(opcode[2])]=love.mouse.isDown(tonumber(opcode[3]))
+  end
   PC=PC+1
  elseif opcode[1] == "MOV" then
   if is_REG(opcode[3]) then
@@ -424,14 +453,14 @@ function love.update()
   drawmode = 1
   PC=PC+1
  end
- t1=clock1()-t1
+ t1=clock()-t1
  if t1 > t1max then
   t1max=t1
-  print("commands per ms="..tostring(t1max).."/commands per sec="..tostring(CPS))
+  print("hertz="..tostring(t1max).."/commands per sec="..tostring(CPS))
  end
  if clock() - t2 <= 1 then
   CPS=CPS+1
-  print("commands per ms="..tostring(t1max).."/commands per sec="..tostring(CPS))
+  print("hertz="..tostring(t1max).."/commands per sec="..tostring(CPS))
  end
  --sleep(1)
 end
