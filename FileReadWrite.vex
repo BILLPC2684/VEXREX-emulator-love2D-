@@ -1,0 +1,18 @@
+ROM={"LOAD	A	0",
+	 "LOAD	C	256",
+     "WSAV	A	A",
+     "ADD	A	1",
+	 "DETC	A	C",
+	 "IF	2",
+	 "JMP	9",
+	 "JMP	3",
+	 "LOAD	A	0",
+	 "RSAV	A	B",
+	 "PRNT	B",
+	 "ADD	A	1",
+	 "DETC	A	C",
+	 "IF	2",
+	 "HALT",
+	 "JMP	10"}
+drivename = "test.file"
+fileLangth = 2048

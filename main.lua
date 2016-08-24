@@ -47,6 +47,7 @@ function love.run()
 end
 t4=0
 --"C:\Program Files\LOVE\love.exe" ./ <ROM> --console
+SaveDrive={}
 skipframe=4
 t1max,CPS=0,0
 state = true
@@ -200,6 +201,33 @@ function split(str, pat)
 	end
 	return t
 end
+function Split(str)
+ local leng=#tostring(str)
+ local out = {}
+ --print(str)
+ local i=0
+ if str == "" then
+  return ""
+ else
+  repeat
+   i=i+1
+   local num = string.byte(tostring(str),i)
+   print(">",num,"<")
+   --print(leng)
+   table.insert(out,num)
+  until i==leng
+ end
+ return out
+end
+
+function bytes(x)
+    local b4=x%256  x=(x-x%256)/256
+    local b3=x%256  x=(x-x%256)/256
+    local b2=x%256  x=(x-x%256)/256
+    local b1=x%256  x=(x-x%256)/256
+    return string.char(b1,b2,b3,b4)
+end
+
 ---------------
 function love.load()
  keyin=""
@@ -262,26 +290,78 @@ function love.load()
   table.insert(RAM,#RAM+1,0)
  end
  drawmode = 1
+ ResetAutoSaveDrive = 500
+ autoSaveDrive=tonumber(ResetAutoSaveDrive)
+ frame = skipframe
+ SaveDrive={}
+ skipframe=4
+ DriveLoad=""
+ --[[if DriveLoad ~= "" then
+  while DriveLoad == nil do
+   DriveLoad = assert(io.open(drivename, "ab"))
+   if DriveLoad:read() ~= nil then
+    test=DriveLoad:read()
+    print(test)
+   else
+    DriveLoad:write(0)
+   end
+   DriveLoad:close()
+  end
+ end]]--
 end
 t2 = clock()
 function love.update()
  t1 = clock()
  opcode=split(tostring(ROM[PC]),"	" or " ")
- --print("PC:"..tostring(PC),"opcode:",opcode[1],opcode[2],opcode[3],"REGS:",REGS[1],REGS[2],REGS[3],REGS[4],REGS[5],REGS[6],REGS[7],REGS[8],"\nSCREEN:",REGS[9],REGS[10],"POS/COL:",X,Y,R,G,B,A,"\nPOINTS:",points[1][1],points[1][2],points[2][1],points[2][2])
+ if arg[3] == "--logs" or arg[3] == "-l" then
+  print("PC:"..tostring(PC),"opcode:",opcode[1],opcode[2],opcode[3],"REGS:",REGS[1],REGS[2],REGS[3],REGS[4],REGS[5],REGS[6],REGS[7],REGS[8],"\nSCREEN:",REGS[9],REGS[10],"POS/COL:",X,Y,R,G,B,A,"\nPOINTS:",points[1][1],points[1][2],points[2][1],points[2][2])
+ end
  if opcode[1] == "LOAD" then
   REGS[def_REG(opcode[2])]=tonumber(opcode[3])
   PC=PC+1
  elseif opcode[1] == "INKY" then
-  REGS[def_REG(opcode[2])]=love.keyboard.isDown(tonumber(opcode[3]))
+  if is_REG(opcode[3]) then
+   if love.keyboard.isDown(REGS[def_REG(opcode[3])]) then
+    REGS[def_REG(opcode[2])]=1
+   else
+    REGS[def_REG(opcode[2])]=0
+   end
+  else
+   if love.keyboard.isDown(tonumber(opcode[3])) then
+    REGS[def_REG(opcode[2])]=1
+   else
+    REGS[def_REG(opcode[2])]=0
+   end
+  end
   PC=PC+1
  elseif opcode[1] == "CRLC" then
   REGS[def_REG(opcode[2])],REGS[def_REG(opcode[3])]=love.mouse.getPosition()
   PC=PC+1
  elseif opcode[1] == "CLIK" then
   if is_REG(opcode[3]) then
-   REGS[def_REG(opcode[2])]=love.mouse.isDown(opcode[3])
+   if love.mouse.isDown(REGS[def_REG(opcode[3])]) then
+    REGS[def_REG(opcode[2])]=1
+   else
+    REGS[def_REG(opcode[2])]=0
+   end
   else
-   REGS[def_REG(opcode[2])]=love.mouse.isDown(tonumber(opcode[3]))
+   if love.mouse.isDown(tonumber(opcode[3])) then
+    REGS[def_REG(opcode[2])]=1
+   else
+    REGS[def_REG(opcode[2])]=0
+   end
+  end
+  PC=PC+1
+ elseif opcode[1] == "	" then
+  if is_REG(opcode[2]) then
+   love.mouse.setX(opcode[2])
+  else
+   love.mouse.setX(tonumber(opcode[2]))
+  end
+  if is_REG(opcode[3]) then
+   love.mouse.setY(opcode[3])
+  else
+   love.mouse.setY(tonumber(opcode[3]))
   end
   PC=PC+1
  elseif opcode[1] == "MOV" then
@@ -335,6 +415,17 @@ function love.update()
    PC=PC+2
   end
  elseif opcode[1] == "HALT" then
+  if drivename ~= nil then
+   print("writting...")
+   local DriveLoad = assert(io.open(drivename, "wb"))
+   for i=1,#SaveDrive do
+    --print(i,SaveDrive[i],string.byte(SaveDrive[i]))
+    DriveLoad:seek("set",i-1)
+    DriveLoad:write(string.char(SaveDrive[i]))
+   end
+   DriveLoad:close()
+   print("DONE...")
+  end
   error("CPU HALTED!!!")
  elseif opcode[1] == "WRAM" then
   RAM[REGS[def_REG(opcode[2])]]=REGS[def_REG(opcode[3])]
@@ -433,7 +524,9 @@ function love.update()
   PC=PC+1
  elseif opcode[1] == "PLOT" then
   --print(x,R,G,B,A)
-  screen[Y+1][X+1]={R,G,B}
+  if X>=0 and X<=resX+1 and Y>=0 and Y<=resY+1 then
+   screen[Y+1][X+1]={R,G,B}
+  end
   drawmode = 1
   PC=PC+1
  elseif opcode[1] == "PONT" then
@@ -452,25 +545,65 @@ function love.update()
   rectangle(points[1][1],points[1][2],points[2][1],points[2][2],{R,G,B})
   drawmode = 1
   PC=PC+1
+ elseif opcode[1] == "WSAV" then
+  if drivename ~= nil then
+   local file = io.open(drivename, "rb")
+   data = {}
+   if file:read() == "" then
+    for i=1,fileLangth do
+	 --print(i,0)
+	 table.insert(SaveDrive,0)
+	end
+   end
+   file:close()
+   if is_REG(opcode[2]) then
+    if is_REG(opcode[3]) then
+     SaveDrive[REGS[def_REG(opcode[2])]+1] = REGS[def_REG(opcode[3])]
+    else
+     SaveDrive[REGS[def_REG(opcode[2])]+1] = tonumber(opcode[3])
+    end
+   else
+    if is_REG(opcode[3]) then
+     SaveDrive[tonumber(opcode[2])+1] = REGS[def_REG(opcode[3])]
+    else
+     SaveDrive[tonumber(opcode[2])+1] = tonumber(opcode[3])
+    end
+   end
+   PC=PC+1
+  else
+   error("no drive...")
+  end
+ elseif opcode[1] == "RSAV" then
+  if drivename ~= nil then
+   --io.open(drivename, "rb"):read()
+   if is_REG(opcode[2]) then
+	REGS[def_REG(opcode[3])]=SaveDrive[REGS[def_REG(opcode[2])]+1]
+   else
+    REGS[def_REG(opcode[3])]=SaveDrive[tonumber(opcode[2])+1]
+   end
+   --file:close()
+   PC=PC+1
+  else
+   error("no drive...")
+  end
  end
  t1=clock()-t1
- if t1 > t1max then
+ --[[if t1 > t1max then
   t1max=t1
   print("hertz="..tostring(t1max).."/commands per sec="..tostring(CPS))
  end
  if clock() - t2 <= 1 then
   CPS=CPS+1
   print("hertz="..tostring(t1max).."/commands per sec="..tostring(CPS))
- end
+ end]]--
  --sleep(1)
 end
-frame = skipframe
 function love.draw()
  if drawmode == 1 and frame < 1 then
-  for renderX=0,resX do
-   for renderY=0,resY do
+  for renderX=1,resX do
+   for renderY=1,resY do
     --print(renderY,renderX,screen[renderY+1][renderX+1][1],screen[renderY+1][renderX+1][2],screen[renderY+1][renderX+1][3])
-    love.graphics.setColor(screen[renderY+1][renderX+1][1],screen[renderY+1][renderX+1][2],screen[renderY+1][renderX+1][3],255)
+    love.graphics.setColor(screen[renderY][renderX][1],screen[renderY][renderX][2],screen[renderY][renderX][3],255)
     love.graphics.rectangle('fill',renderX-1,renderY-1,1,1)
     --[[love.graphics.setColor(screenl1[renderY+1][renderX+1][1],screenl1[renderY+1][renderX+1][2],screenl1[renderY+1][renderX+1][3],screenl1[renderY+1][renderX+1][4])
     love.graphics.rectangle('fill',renderX-1,renderY-1,renderX-1,renderY-1)
@@ -483,5 +616,27 @@ function love.draw()
  end
  if frame > 0 then
   frame=frame-1
+ end
+ if autoSaveDrive > 0 then
+  autoSaveDrive=autoSaveDrive-1
+ else
+  if drivename ~= nil then
+   print("writting...")
+   DriveLoad = assert(io.open(drivename, "wb"))
+   for i=1,#SaveDrive do
+    --print(i,SaveDrive[i],string.byte(SaveDrive[i]))
+    DriveLoad:seek("set",i-1)
+    DriveLoad:write(string.char(SaveDrive[i]))
+   end
+   print("reading...")
+   DriveLoad = assert(io.open(drivename, "rb"))
+   for i=1,DriveLoad:seek("end")-1 do
+    --print(i,SaveDrive[i],string.byte(SaveDrive[i]))
+    DriveLoad:seek("set",i)
+    SaveDrive[i+1]=string.byte(DriveLoad:read(1))
+   end
+   print("DONE...")
+   autoSaveDrive = ResetAutoSaveDrive
+  end
  end
 end

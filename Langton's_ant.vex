@@ -94,3 +94,4 @@ ROM={"RCOL	255",
 	 "LOAD	D	2",
 	 "ADD	G	1",
 	 "JMP	20"}   --] --]
+skipframe=6
