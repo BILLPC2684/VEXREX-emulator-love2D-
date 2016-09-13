@@ -1,6 +1,6 @@
 --"C:\Program Files\LOVE\love.exe" ./ <ROM> --console
 --SYSTEM_RUN--
-dofile("./love.run.lua")
+dofile("./src/love.run.lua")
 t4=0
 SaveDrive={}
 skipframe=4
@@ -109,7 +109,7 @@ function is_REG(ID)
  end
 end
 
-dofile("./opcodes.lua")
+dofile("./src/opcodes.lua")
 
 function def_REG(ID)
  if ID == "A" then
@@ -135,7 +135,7 @@ function def_REG(ID)
  end
 end
 
-dofile("./keys.lua")
+dofile("./src/keys.lua")
 
 function split(str, pat)
 	local t = {}  -- NOTE: use {n = 0} in Lua-5.0
@@ -183,8 +183,8 @@ function bytes(x)
 end
 
 ---------------
-dofile("./love.load.lua")
+dofile("./src/love.load.lua")
 t2 = clock()
 directopcode = false
-dofile("./love.update.lua")
-dofile("./love.draw.lua")
+dofile("./src/love.update.lua")
+dofile("./src/love.draw.lua")
