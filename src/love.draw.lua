@@ -11,10 +11,16 @@ function love.draw()
     love.graphics.rectangle('fill',renderX-1,renderY-1,renderX-1,renderY-1)--]]
     drawmode = 0
     frame = skipframe
+    if love.mouse.isGrabbed() then
+     -- love.mouse.setPosition(mouseX,mouseY)
+    end
    end
   end
  end
  if frame > 0 then
+  if love.mouse.isGrabbed() then
+   --mouseX,mouseY=love.mouse.getPosition()
+  end
   frame=frame-1
  end
  if autoSaveDrive > 0 then

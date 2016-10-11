@@ -11,22 +11,14 @@ function love.load()
   end
   table.insert(screen,temp)
  end
---[[ screenl1={}
+ tempscreen={}
  for i=1,resY do
   temp={}
   for i=0,resX do
    table.insert(temp,{0,0,0,0})
   end
-  table.insert(screenl1,temp)
+  table.insert(tempscreen,temp)
  end
- screenl2={}
- for i=1,resY do
-  temp={}
-  for i=0,resX do
-   table.insert(temp,{0,0,0,0})
-  end
-  table.insert(screenl2,temp)
- end]]--
  love.window.setMode(resX,resY,{vsync=false,fullscreen=false})
  FONT={""}
  PC=1
@@ -47,7 +39,7 @@ function love.load()
  end]]--
  File=dofile(arg[2])
  --print(h,w)
- REGS={0,0,0,0,0,0,0,0,resX,resY}
+ REGS={bytes(0),bytes(0),bytes(0),bytes(0),bytes(0),bytes(0),bytes(0),bytes(0),bytes(resX),bytes(resY)}
  R=0x00
  G=0x00
  B=0x00
