@@ -1,6 +1,7 @@
 --"C:\Program Files\LOVE\love.exe" ./ <ROM> --console
 --SYSTEM_RUN--
 dofile("./src/love.run.lua")
+require("bit")
 t4=0
 SaveDrive={}
 skipframe=4
@@ -27,6 +28,7 @@ function love.wheelmoved(x, y)
   scrollx=-1
  end
 end
+mouseX,mouseY = 0,0
 function love.keypressed(key)
  if key == "escape" then
   t4 = clock()
@@ -64,6 +66,7 @@ function rectangle(x0, y0, x1, y1, color)
 end
 
 function line(x0, y0, x1, y1, color) -- most code from Voltzlive
+ --print(x0,y0,x1,y1,color)
  dx = math.abs(x1-x0)
  if x0<x1 then
   sx = 1
@@ -84,7 +87,7 @@ function line(x0, y0, x1, y1, color) -- most code from Voltzlive
 --  print(X,Y,color[1],color[2],color[3])
   if X>=0 and X<=resX+1 and Y>=0 and Y<=resY+1 then
 --   print("hi")
-   screen[Y][X] = color
+   tempscreen[Y][X] = color
   end
   if x0==x1 and y0==y1 then
    break
@@ -166,7 +169,7 @@ function Split(str)
   repeat
    i=i+1
    local num = string.byte(tostring(str),i)
-   print(">",num,"<")
+   --print(">",num,"<")
    --print(leng)
    table.insert(out,num)
   until i==leng
@@ -175,13 +178,52 @@ function Split(str)
 end
 
 function bytes(x)
-    local b4=x%256  x=(x-x%256)/256
-    local b3=x%256  x=(x-x%256)/256
-    local b2=x%256  x=(x-x%256)/256
-    local b1=x%256  x=(x-x%256)/256
-    return string.char(b1,b2,b3,b4)
+ local b4=x%256  x=(x-x%256)/256
+ local b3=x%256  x=(x-x%256)/256
+ local b2=x%256  x=(x-x%256)/256
+ local b1=x%256  x=(x-x%256)/256
+ return {b4,b3,b2,b1}
 end
 
+function int(...) -- use length of string to determine 8,16,32,64 bits
+    t = {...}
+    if false then--endian=="big" then --reverse bytes
+        local tt={}
+        for k=1,#t do
+            tt[#t-k+1]=t[k]
+        end
+        t=tt
+    end
+    local n=0
+    for k=1,#t[1] do
+        n=n+t[1][k]*2^((k-1)*8)
+    end
+    if false then--signed then
+        n = (n > 2^(#t*8-1) -1) and (n - 2^(#t*8)) or n -- if last bit set, negative.
+    end
+    return n
+end
+
+--[[function int(...) -- use length of string to determine 8,16,32,64 bits
+ local t={...}
+ print(t[1][1],t[1][2],t[1][3],t[1][4])
+ if false then --endian=="big" then --reverse bytes
+  local tt={}
+   for k=1,#t do
+    tt[#t-k+1]=t[k]
+   end
+  t=tt
+ end
+ local n=0
+ for k=1,#t do
+  print(k,#t)
+  n=n+t[k]*2^((k-1)*8)
+ end
+ if false then --signed then
+  n = (n > 2^(#t*8-1) -1) and (n - 2^(#t*8)) or n -- if last bit set, negative.
+ end
+ return n
+end]]--
 ---------------
 dofile("./src/love.load.lua")
 t2 = clock()
