@@ -1,14 +1,14 @@
 ROM={"RCOL	255",
-	 "GCOL	255",
-	 "BCOL	255",
-	 "XPOS	0",
-	 "YPOS	0",
-	 "PONT	1",
-	 "XPOS	SCW",
-	 "YPOS	SCH",
-	 "PONT	2",
-	 "RECT",
-	 "MOV	G	SCW",--\ [PROGRAM LANGTON'S ANT]
+     "GCOL	255",
+     "BCOL	255",
+     "XPOS	0",
+     "YPOS	0",
+     "PONT	0",
+     "XPOS	SCW",
+     "YPOS	SCH",
+     "PONT	1",
+     "RECT",
+     "MOV	G	SCW",--\ [PROGRAM LANGTON'S ANT]
      "DIV	G	2",--  | \At a white square, turn 90° right, flip the color of the square, move forward one unit
      "MOV	H	SCH",--| \At a black square, turn 90° left,  flip the color of the square, move forward one unit
      "DIV	H	2",--  \CENTER OF THE SCREEN
@@ -17,81 +17,82 @@ ROM={"RCOL	255",
      "LOAD	C	0",--B
      "LOAD	D	0",--DIRECTION 0=^ 1=> 2=v 3=<
      "LOAD	E	0",--BLOCK UNDER CORDS
-	 "XPOS	G",
-	 "YPOS	H",
-	 "REAR	A",--READS R FROM THE RGB OF THE SELECTED PIXEL ONSCREEN
+     "XPOS	G",
+     "YPOS	H",
+     "REAR	A",--READS R FROM THE RGB OF THE SELECTED PIXEL ONSCREEN
      "REAG	B",--READS G FROM THE RGB OF THE SELECTED PIXEL ONSCREEN
      "REAB	C",--READS B FROM THE RGB OF THE SELECTED PIXEL ONSCREEN
-	 "RCOL	255",
-	 "GCOL	0",
-	 "BCOL	0",
-	 "PLOT",
-	 "DETC	B	255",
-	 "IF	2",
-	 "JMP	33",
-	 "JMP	65",--
-	 "RCOL	0",        --[
-	 "GCOL	0",
-	 "BCOL	0",
-	 "PLOT",
-	 "DETC	D	0",--[
-	 "IF	2",
-	 "JMP	41",
-	 "JMP	44",
-	 "LOAD	D	1",
-	 "SUB	H	1",
-	 "JMP	20",   --]
-	 "DETC	D	1",--[
-	 "IF	2",
-	 "JMP	48",
-	 "JMP	51",
-	 "LOAD	D	2",
-	 "ADD	G	1",
-	 "JMP	20",   --]
-	 "DETC	D	2",--[
-	 "IF	2",
-	 "JMP	55",
-	 "JMP	58",
-	 "LOAD	D	3",
-	 "ADD	H	1",
-	 "JMP	20",   --]
-	 "DETC	D	3",--[
-	 "IF	2",
-	 "JMP	62",
-	 "JMP	20",
-	 "LOAD	D	0",
-	 "SUB	G	1",
-	 "JMP	20",   --] --]
-	 "RCOL	255",      --[
-	 "GCOL	255",
-	 "BCOL	255",
-	 "PLOT",
-	 "DETC	D	0",--[
-	 "IF	2",
-	 "JMP	73",
-	 "JMP	76",
-	 "LOAD	D	3",
-	 "ADD	H	1",
-	 "JMP	20",   --]
-	 "DETC	D	1",--[
-	 "IF	2",
-	 "JMP	80",
-	 "JMP	83",
-	 "LOAD	D	0",
-	 "SUB	G	1",
-	 "JMP	20",   --]
-	 "DETC	D	2",--[
-	 "IF	2",
-	 "JMP	87",
-	 "JMP	90",
-	 "LOAD	D	1",
-	 "SUB	H	1",
-	 "JMP	20",   --]
-	 "DETC	D	3",--[
-	 "IF	2",
-	 "JMP	94",
-	 "JMP	20",
-	 "LOAD	D	2",
-	 "ADD	G	1",
-	 "JMP	20"}   --] --]
-skipframe=6
+     "RCOL	255",
+     "GCOL	0",
+     "BCOL	0",
+     "PLOT",
+     "REND",
+     "CMP	B	255",
+     "IF	2",
+     "JMP	34",
+     "JMP	66",--
+     "RCOL	0",        --[
+     "GCOL	0",
+     "BCOL	0",
+     "PLOT",
+     "CMP	D	0",--[
+     "IF	2",
+     "JMP	42",
+     "JMP	45",
+     "LOAD	D	1",
+     "SUB	H	1",
+     "JMP	20",   --]
+     "CMP	D	1",--[
+     "IF	2",
+     "JMP	49",
+     "JMP	52",
+     "LOAD	D	2",
+     "ADD	G	1",
+     "JMP	20",   --]
+     "CMP	D	2",--[
+     "IF	2",
+     "JMP	56",
+     "JMP	59",
+     "LOAD	D	3",
+     "ADD	H	1",
+     "JMP	20",   --]
+     "CMP	D	3",--[
+     "IF	2",
+     "JMP	63",
+     "JMP	20",
+     "LOAD	D	0",
+     "SUB	G	1",
+     "JMP	20",   --] --]
+     "RCOL	255",      --[
+     "GCOL	255",
+     "BCOL	255",
+     "PLOT",
+     "CMP	D	0",--[
+     "IF	2",
+     "JMP	74",
+     "JMP	77",
+     "LOAD	D	3",
+     "ADD	H	1",
+     "JMP	20",   --]
+     "CMP	D	1",--[
+     "IF	2",
+     "JMP	81",
+     "JMP	84",
+     "LOAD	D	0",
+     "SUB	G	1",
+     "JMP	20",   --]
+     "CMP	D	2",--[
+     "IF	2",
+     "JMP	88",
+     "JMP	91",
+     "LOAD	D	1",
+     "SUB	H	1",
+     "JMP	20",   --]
+     "CMP	D	3",--[
+     "IF	2",
+     "JMP	95",
+     "JMP	20",
+     "LOAD	D	2",
+     "ADD	G	1",
+     "JMP	20"}   --] --]
+skipframe=0
