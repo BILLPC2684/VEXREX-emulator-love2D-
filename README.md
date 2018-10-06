@@ -1,5 +1,6 @@
 ## THIS PROJECT HAS BEEN IMPROVED:
-https://github.com/BILLPC2684/TGR-PRTO-C
+https://github.com/BILLPC2684/TGR-PRTO-C \
+\
 the VEXREX emulator project in Love2D(Lua).
 
 #note:
